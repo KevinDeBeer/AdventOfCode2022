@@ -1,34 +1,19 @@
-﻿// See https://aka.ms/new-console-template for more information
-using Day01.Models;
+﻿using Day01.Models;
 
-AnalyzeData();
-
-void AnalyzeData()
-{
-    IEnumerable<string> input = Input.Data.ToList();
-    List<int> sums = new();
-    int listIndex = 0;
-
-    do
+IEnumerable<int> sums = Input.Data.Aggregate(new List<List<int>> { new List<int>() },
+    (list, value) =>
     {
-        int totalCalories = GetCaloriesForGnome(input, out listIndex);
+        if (int.TryParse(value, out int result))
+        {
+            list.Last().Add(result);
+        }
+        else
+        {
+            list.Add(new List<int>());
+        }
 
-        sums.Add(totalCalories);
+        return list;
+    }).Select(l => l.Sum());
 
-        input = input.Skip(listIndex + 1);
-    } while (input.Any() && listIndex > 0);
-
-    int mostCalories = sums.Max();
-    int top3Calories = sums.OrderByDescending(s => s).Take(3).Sum();
-}
-
-int GetCaloriesForGnome(IEnumerable<string> toSearch, out int newIndex)
-{
-    newIndex = toSearch.ToList().IndexOf(string.Empty);
-
-    IEnumerable<string> calories = toSearch.Take(newIndex);
-
-    int totalCalories = calories.Select(x => Convert.ToInt32(x)).Sum();
-
-    return totalCalories;
-}
+Console.WriteLine($"Most Calories: {sums.Max()}");
+Console.WriteLine($"Top 3 calories sum: {sums.OrderByDescending(s => s).Take(3).Sum()}");
