@@ -1,19 +1,23 @@
-﻿using Day01.Models;
+﻿using Utilities;
 
-IEnumerable<int> sums = Input.Data.Aggregate(new List<List<int>> { new List<int>() },
-    (list, value) =>
+IEnumerable<string> input = InputHelper.GetInput("input.txt");
+
+IEnumerable<int> sums = input.Aggregate(new List<List<int>> { new List<int>() },
+    (elves, calories) =>
     {
-        if (int.TryParse(value, out int result))
+        if (int.TryParse(calories, out int result))
         {
-            list.Last().Add(result);
+            elves.Last().Add(result);
         }
         else
         {
-            list.Add(new List<int>());
+            elves.Add(new List<int>());
         }
 
-        return list;
-    }).Select(l => l.Sum());
+        return elves;
+    })
+    .Select(l => l.Sum())
+    .OrderByDescending(s => s);
 
-Console.WriteLine($"Most Calories: {sums.Max()}");
-Console.WriteLine($"Top 3 calories sum: {sums.OrderByDescending(s => s).Take(3).Sum()}");
+Console.WriteLine($"Most Calories: {sums.First()}");
+Console.WriteLine($"Top 3 calories sum: {sums.Take(3).Sum()}");
