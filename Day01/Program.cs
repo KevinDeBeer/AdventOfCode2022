@@ -1,6 +1,6 @@
 ﻿using Utilities;
 
-IEnumerable<string> input = InputHelper.GetInput("input.txt");
+IEnumerable<string> input = InputHelper.GetTextInput("input.txt");
 
 IEnumerable<int> sums = input.Aggregate(new List<List<int>> { new List<int>() },
     (elves, calories) =>

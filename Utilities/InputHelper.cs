@@ -2,7 +2,23 @@
 {
     public static class InputHelper
     {
-        public static IEnumerable<string> GetInput(string fileName)
+        public static IEnumerable<string> GetTextInput(string fileName)
+        {
+            string[] lines = GetLines(fileName);
+
+            return lines;
+        }
+
+        public static List<int> GetNumericInput(string fileName)
+        {
+            string[] lines = GetLines(fileName);
+
+            List<int> result = lines.Select(int.Parse).ToList();
+
+            return result;
+        }
+
+        private static string[] GetLines(string fileName)
         {
             string[] files = Directory.GetFiles("../../../Data/");
             string file = files.FirstOrDefault(f => f.Contains(fileName))!;
@@ -12,7 +28,9 @@
                 throw new FileNotFoundException();
             }
 
-            return File.ReadAllLines(file).ToList();
+            string[] lines = File.ReadAllLines(file);
+
+            return lines;
         }
     }
 }

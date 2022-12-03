@@ -5,7 +5,7 @@ const int charOffset = 23;
 int regularScore = 0;
 int decideOutcomeScore = 0;
 
-IEnumerable<string> input = InputHelper.GetInput("input.txt");
+IEnumerable<string> input = InputHelper.GetTextInput("input.txt");
 
 IEnumerable<char[]> games = input.Select(line =>
 {
