@@ -2,6 +2,13 @@
 {
     public static class InputHelper
     {
+        public static string GetSingleLine(string fileName)
+        {
+            string[] lines = GetLines(fileName);
+
+            return lines.Single();
+        }
+
         public static IEnumerable<string> GetTextInput(string fileName)
         {
             string[] lines = GetLines(fileName);
