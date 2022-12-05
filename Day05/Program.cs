@@ -3,15 +3,27 @@ const bool moveInBatch = true;
 
 IEnumerable<string> data = InputHelper.GetTextInput("input.txt");
 IEnumerable<string> fileHeader = data.TakeWhile(d => !string.IsNullOrWhiteSpace(d));
-IEnumerable<string> crates = fileHeader.SkipLast(1);
 IEnumerable<string> instructions = data.Skip(fileHeader.Count() + 1);
+string[] crateColumns = fileHeader.SkipLast(1).ToArray();
 int nrOfStacks = fileHeader.Last().Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).Max();
 
 string[][] stacks = new string[nrOfStacks][];
 
 for (int i = 0; i < nrOfStacks; i++)
 {
-    stacks[i] = CreateStack(crates, i);
+    List<string> stacksInRow = new();
+
+    for (int j = 0; j < crateColumns.Length; j++)
+    {
+        string crate = crateColumns[j].Substring(i * 4, 3);
+
+        if (!string.IsNullOrWhiteSpace(crate))
+        {
+            stacksInRow.Add(crate);
+        }
+    }
+
+    stacks[i] = stacksInRow.ToArray();
 }
 
 foreach (string line in instructions)
@@ -22,34 +34,16 @@ foreach (string line in instructions)
 
 Console.Write($"Result: {string.Join("", stacks.Select(s => s.First().Replace("[", "").Replace("]", "")))}");
 
-string[] CreateStack(IEnumerable<string> stackLines, int stackIndex)
-{
-    List<string> stacksInRow = new();
-
-    foreach (string stackLine in stackLines)
-    {
-        string crate = stackLine.Substring(stackIndex * 4, 3);
-
-        if (!string.IsNullOrWhiteSpace(crate))
-        {
-            stacksInRow.Add(crate);
-        }
-    }
-
-    return stacksInRow.ToArray();
-}
-
 void MoveCrates(int nrToMove, int moveFrom, int moveTo)
 {
     int nrOfMovingCrates = moveInBatch ? nrToMove : 1;
 
     for (int i = 0; i < (moveInBatch ? 1 : nrToMove); i++)
     {
-        string[] StackToMoveFrom = stacks.ElementAt(moveFrom);
-        List<string> StackToMoveTo = stacks.ElementAt(moveTo).ToList();
-        IEnumerable<string> CratesToMove = StackToMoveFrom.Take(nrOfMovingCrates);
+        string[] StackToMoveFrom = stacks[moveFrom];
+        List<string> StackToMoveTo = stacks[moveTo].ToList();
 
-        StackToMoveTo.InsertRange(0, CratesToMove);
+        StackToMoveTo.InsertRange(0, StackToMoveFrom.Take(nrOfMovingCrates));
 
         stacks[moveTo] = StackToMoveTo.ToArray();
         stacks[moveFrom] = StackToMoveFrom.Skip(nrOfMovingCrates).ToArray();
