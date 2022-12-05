@@ -1,58 +1,43 @@
-﻿using Day05.Models;
-using Utilities;
+﻿using Utilities;
+const bool moveInBatch = false;
 
 IEnumerable<string> data = InputHelper.GetTextInput("input.txt");
-string[][] stacks = Array.Empty<string[]>();
-List<Instruction> instructions = new();
+IEnumerable<string> crateLines = data.TakeWhile(d => !string.IsNullOrWhiteSpace(d));
+IEnumerable<string> instructionLines = data.Skip(crateLines.Count() + 1);
+int nrOfStacks = crateLines.Last().Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).Max();
 
-InstantiateData();
-MoveCrates(moveInBatch: false);
+string[][] stacks = new string[nrOfStacks][];
 
-string result = string.Empty;
+for (int i = 0; i < nrOfStacks; i++)
+{
+    stacks[i] = CreateStack(crateLines.SkipLast(1), i);
+}
+
+foreach (string line in instructionLines)
+{
+    string[] split = line.Split(' ');
+
+    int nrToMove = int.Parse(split[1]);
+    int moveFrom = int.Parse(split[2]);
+    int moveTo = int.Parse(split[3]);
+
+    MoveCrates(moveFrom, moveTo, nrToMove, moveInBatch);
+}
+
+Console.Write("Result: ");
 
 foreach (string[] stack in stacks)
 {
-    result += stack.FirstOrDefault().Replace("[", string.Empty).Replace("]", string.Empty);
+    Console.Write(stack.First().Replace("[", string.Empty).Replace("]", string.Empty));
 }
 
-Console.WriteLine($"Result: {result}");
-
-void InstantiateData()
-{
-    IEnumerable<string> currentCrateLines = data.TakeWhile(d => !string.IsNullOrWhiteSpace(d));
-    IEnumerable<string> instructionLines = data.Skip(currentCrateLines.Count() + 1);
-    int nrOfStacks = currentCrateLines.Last().Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).Max();
-
-    stacks = new string[nrOfStacks][];
-
-    for (int i = 0; i < nrOfStacks; i++)
-    {
-        string[] stack = GetStack(currentCrateLines.SkipLast(1), i);
-        stacks[i] = stack;
-    }
-
-    foreach (string line in instructionLines)
-    {
-        string[] split = line.Split(' ');
-
-        Instruction instruction = new()
-        {
-            NrToMove = int.Parse(split[1]),
-            From = int.Parse(split[3]) - 1,
-            To = int.Parse(split[5]) - 1
-        };
-
-        instructions.Add(instruction);
-    }
-}
-
-string[] GetStack(IEnumerable<string> stackLines, int index)
+string[] CreateStack(IEnumerable<string> stackLines, int stackIndex)
 {
     List<string> stacksInRow = new();
 
     foreach (string stackLine in stackLines)
     {
-        string crate = string.Concat(stackLine.Skip(index * 4).Take(3));
+        string crate = stackLine.Substring(stackIndex * 4, 3);
 
         if (!string.IsNullOrWhiteSpace(crate))
         {
@@ -63,17 +48,14 @@ string[] GetStack(IEnumerable<string> stackLines, int index)
     return stacksInRow.ToArray();
 }
 
-void MoveCrates(bool moveInBatch = true)
+void MoveCrates(int moveFrom, int moveTo, int nrToMove, bool moveInBatch = true)
 {
-    foreach (Instruction instruction in instructions)
-    {
-        string[] StackToMoveFrom = stacks.ElementAt(instruction.From);
-        List<string> StackToMoveTo = stacks.ElementAt(instruction.To).ToList();
-        IEnumerable<string> CratesToMove = StackToMoveFrom.Take(instruction.NrToMove);
+    string[] StackToMoveFrom = stacks.ElementAt(moveFrom);
+    List<string> StackToMoveTo = stacks.ElementAt(moveTo).ToList();
+    IEnumerable<string> CratesToMove = StackToMoveFrom.Take(nrToMove);
 
-        StackToMoveTo.InsertRange(0, moveInBatch ? CratesToMove.Reverse() : CratesToMove);
+    StackToMoveTo.InsertRange(0, moveInBatch ? CratesToMove.Reverse() : CratesToMove);
 
-        stacks[instruction.To] = StackToMoveTo.ToArray();
-        stacks[instruction.From] = StackToMoveFrom.Skip(instruction.NrToMove).ToArray();
-    }
+    stacks[moveTo] = StackToMoveTo.ToArray();
+    stacks[moveFrom] = StackToMoveFrom.Skip(nrToMove).ToArray();
 }
